@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>M3 Solutions Invoice Builder</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="editor-panel">
+      <div class="editor-brand">
+        <div>
+          <h1>M3 Invoice Builder</h1>
+          <p>Version 2.0</p>
+        </div>
+      </div>
+
+      <div class="editor-section">
+        <h2>Invoice details</h2>
+        <label>
+          Invoice Number
+          <input id="invoiceNumberInput" type="text" value="004" />
+        </label>
+        <label>
+          Invoice Date
+          <input id="invoiceDateInput" type="date" />
+        </label>
+      </div>
+
+      <div class="editor-section">
+        <h2>Customer</h2>
+        <label>
+          Customer Name
+          <input id="customerNameInput" type="text" placeholder="Customer name" />
+        </label>
+        <label>
+          Phone
+          <input id="customerPhoneInput" type="text" placeholder="07X XXX XXXX" />
+        </label>
+        <label>
+          Website / Email
+          <input id="customerWebInput" type="text" placeholder="customer.lk / email" />
+        </label>
+      </div>
+
+      <div class="editor-section">
+        <div class="section-title-row">
+          <h2>Invoice items</h2>
+          <button id="addItemBtn" class="small-btn" type="button">+ Add item</button>
+        </div>
+        <div id="itemEditorList" class="item-editor-list"></div>
+      </div>
+
+      <div class="editor-section two-col">
+        <label>
+          Tax %
+          <input id="taxInput" type="number" min="0" step="0.01" value="0" />
+        </label>
+        <label>
+          Currency
+          <input id="currencyInput" type="text" value="RS." maxlength="8" />
+        </label>
+      </div>
+
+      <div class="editor-section">
+        <h2>Print / PDF Options</h2>
+        <label class="checkbox-label">
+          <input id="previewBgCheckbox" type="checkbox" checked />
+          Show background in preview & PDF
+        </label>
+        <label class="checkbox-label">
+          <input id="printBgCheckbox" type="checkbox" checked />
+          Include background when printing
+        </label>
+        <label>
+          PDF Quality
+          <select id="pdfQualitySelect" class="quality-select">
+            <option value="ultra" selected>Ultra HD (300 DPI Print Quality)</option>
+            <option value="high">High (200 DPI)</option>
+            <option value="standard">Standard (150 DPI)</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="editor-actions">
+        <button id="downloadPdfBtn" class="primary-btn" type="button">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Print / Save PDF (Download)
+        </button>
+        <div class="editor-actions-secondary">
+          <button id="printBtn" class="secondary-btn" type="button">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 5px;"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+            Print
+          </button>
+          <button id="resetBtn" class="secondary-btn" type="button">Reset</button>
+        </div>
+      </div>
+
+      <p class="print-tip">
+        <b>Print / Save PDF</b> directly downloads an A4 PDF matching your preview. Use <b>Print</b> to open the browser print dialog.
+      </p>
+    </aside>
+
+    <main class="preview-wrap">
+      <section id="invoice" class="invoice-page">
+        <div class="overlay invoice-meta">
+          <div class="invoice-no">INVOICE #<span id="invoiceNumber">004</span></div>
+          <div class="invoice-date-label">DATE ISSUED:</div>
+          <div class="invoice-date" id="invoiceDate">SEP 10, 2026</div>
+        </div>
+
+        <div id="invoiceRows" class="overlay invoice-rows"></div>
+
+        <div class="overlay totals-box">
+          <div class="value" id="subtotalValue">RS. 0</div>
+          <div class="value" id="taxValue">RS. 0</div>
+          <div class="value total" id="totalValue">RS. 0</div>
+        </div>
+
+        <div class="overlay client-box">
+          <div id="customerName">CUSTOMER NAME</div>
+          <div id="customerPhone">07X XXX XXXX</div>
+          <div id="customerWeb">CUSTOMER.LK</div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="assets/invoice-bg-data.js"></script>
+  <script src="assets/html2canvas.min.js"></script>
+  <script src="assets/jspdf.umd.min.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
