@@ -20,13 +20,27 @@
       </div>
 
       <div class="editor-section">
-        <h2>Invoice details</h2>
+        <h2>Document type</h2>
+        <div class="doc-type-toggle">
+          <button id="docTypeInvoiceBtn" class="type-toggle-btn active" type="button" data-type="invoice">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+            Invoice
+          </button>
+          <button id="docTypeQuotationBtn" class="type-toggle-btn" type="button" data-type="quotation">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M9 15l2 2 4-4"/></svg>
+            Quotation
+          </button>
+        </div>
+      </div>
+
+      <div class="editor-section">
+        <h2 id="docDetailsHeading">Invoice details</h2>
         <label>
-          Invoice Number
+          <span id="docNumberLabel">Invoice Number</span>
           <input id="invoiceNumberInput" type="text" value="004" />
         </label>
         <label>
-          Invoice Date
+          <span id="docDateLabel">Invoice Date</span>
           <input id="invoiceDateInput" type="date" />
         </label>
       </div>
@@ -49,7 +63,7 @@
 
       <div class="editor-section">
         <div class="section-title-row">
-          <h2>Invoice items</h2>
+          <h2 id="docItemsHeading">Invoice items</h2>
           <button id="addItemBtn" class="small-btn" type="button">+ Add item</button>
         </div>
         <div id="itemEditorList" class="item-editor-list"></div>
@@ -108,7 +122,7 @@
     <main class="preview-wrap">
       <section id="invoice" class="invoice-page">
         <div class="overlay invoice-meta">
-          <div class="invoice-no">INVOICE #<span id="invoiceNumber">004</span></div>
+          <div class="invoice-no"><span id="docTypePrefix">INVOICE</span> #<span id="invoiceNumber">004</span></div>
           <div class="invoice-date-label">DATE ISSUED:</div>
           <div class="invoice-date" id="invoiceDate">SEP 10, 2026</div>
         </div>

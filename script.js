@@ -7,8 +7,26 @@ const defaultItems = () => ([
 ]);
 
 const state = {
+  docType: "invoice",
   items: defaultItems()
 };
+
+function getDocBgUrl() {
+  if (state.docType === "quotation") {
+    return window.QUOTATION_BG_BASE64 || "assets/Quotation.png";
+  }
+  return window.INVOICE_BG_BASE64 || "assets/invoice-background.png";
+}
+
+function getDocTypeTitle() {
+  return state.docType === "quotation" ? "QUOTATION" : "INVOICE";
+}
+
+function setDocType(type) {
+  if (state.docType === type) return;
+  state.docType = type;
+  renderInvoice();
+}
 
 function defaultDate() {
   const d = new Date();
@@ -128,6 +146,27 @@ function renderItemEditors() {
 }
 
 function renderInvoice() {
+  const isQuotation = state.docType === "quotation";
+  const typeTitle = getDocTypeTitle();
+
+  if ($("docTypePrefix")) $("docTypePrefix").textContent = typeTitle;
+  if ($("docDetailsHeading")) $("docDetailsHeading").textContent = isQuotation ? "Quotation details" : "Invoice details";
+  if ($("docNumberLabel")) $("docNumberLabel").textContent = isQuotation ? "Quotation Number" : "Invoice Number";
+  if ($("docDateLabel")) $("docDateLabel").textContent = isQuotation ? "Quotation Date" : "Invoice Date";
+  if ($("docItemsHeading")) $("docItemsHeading").textContent = isQuotation ? "Quotation items" : "Invoice items";
+
+  if ($("docTypeInvoiceBtn")) $("docTypeInvoiceBtn").classList.toggle("active", !isQuotation);
+  if ($("docTypeQuotationBtn")) $("docTypeQuotationBtn").classList.toggle("active", isQuotation);
+
+  const previewHasBg = !$("invoice").classList.contains("no-preview-bg");
+  if (previewHasBg) {
+    $("invoice").style.backgroundImage = `url("${getDocBgUrl()}")`;
+  } else {
+    $("invoice").style.backgroundImage = "none";
+  }
+  $("invoice").classList.toggle("type-quotation", isQuotation);
+  document.body.classList.toggle("type-quotation", isQuotation);
+
   $("invoiceNumber").textContent = $("invoiceNumberInput").value || "—";
   $("invoiceDate").textContent = formatDate($("invoiceDateInput").value);
   $("customerName").textContent = ($("customerNameInput").value || "CUSTOMER NAME").toUpperCase();
@@ -183,6 +222,13 @@ function bindLiveInputs() {
   }));
 }
 
+if ($("docTypeInvoiceBtn")) {
+  $("docTypeInvoiceBtn").addEventListener("click", () => setDocType("invoice"));
+}
+if ($("docTypeQuotationBtn")) {
+  $("docTypeQuotationBtn").addEventListener("click", () => setDocType("quotation"));
+}
+
 $("addItemBtn").addEventListener("click", () => {
   state.items.push({ description: "New Item", price: 0, qty: 1 });
   renderItemEditors();
@@ -220,7 +266,7 @@ async function generateMasterInvoiceCanvas() {
   // 1. Draw Background
   if (previewHasBg) {
     const img = new Image();
-    img.src = window.INVOICE_BG_BASE64 || "assets/invoice-background.png";
+    img.src = getDocBgUrl();
     if (img.decode) {
       await img.decode();
     } else {
@@ -237,7 +283,7 @@ async function generateMasterInvoiceCanvas() {
 
   const fontFamily = '"Space Grotesk", Arial, sans-serif';
 
-  // 2. Invoice Meta: right: 71px, top: 169px, width: 150px
+  // 2. Invoice / Quotation Meta: right: 71px, top: 169px, width: 150px
   const metaRight = (794 - 71) * S;
   const metaTop = 169 * S;
   const metaLineHeight = 21 * S;
@@ -245,11 +291,12 @@ async function generateMasterInvoiceCanvas() {
   ctx.textAlign = "right";
   ctx.textBaseline = "top";
 
-  // INVOICE #004
+  // INVOICE #004 or QUOTATION #004
   ctx.font = `700 ${Math.round(14 * S)}px ${fontFamily}`;
   ctx.fillStyle = previewHasBg ? "#c8ff1f" : "#111111";
   const invNo = ($("invoiceNumberInput").value || "004").trim();
-  ctx.fillText(`INVOICE #${invNo}`, metaRight, metaTop);
+  const docType = getDocTypeTitle();
+  ctx.fillText(`${docType} #${invNo}`, metaRight, metaTop);
 
   // DATE ISSUED:
   ctx.font = `600 ${Math.round(14 * S)}px ${fontFamily}`;
@@ -382,8 +429,9 @@ async function downloadPDF() {
       throw new Error("jsPDF library is not loaded.");
     }
 
+    const docPrefix = state.docType === "quotation" ? "Quotation" : "Invoice";
     const invNo = ($("invoiceNumberInput").value || "004").trim().replace(/[^a-zA-Z0-9_-]/g, "");
-    const filename = `Invoice_${invNo || "004"}.pdf`;
+    const filename = `${docPrefix}_${invNo || "004"}.pdf`;
 
     // Render directly at master 2480x3508 300 DPI resolution
     const canvas = await generateMasterInvoiceCanvas();
@@ -430,8 +478,8 @@ $("printBtn").addEventListener("click", () => {
 $("previewBgCheckbox").addEventListener("change", (e) => {
   const isChecked = e.target.checked;
   $("invoice").classList.toggle("no-preview-bg", !isChecked);
-  if (isChecked && window.INVOICE_BG_BASE64) {
-    $("invoice").style.backgroundImage = `url("${window.INVOICE_BG_BASE64}")`;
+  if (isChecked) {
+    $("invoice").style.backgroundImage = `url("${getDocBgUrl()}")`;
   }
   if ($("printBgCheckbox")) {
     $("printBgCheckbox").checked = isChecked;
@@ -444,6 +492,7 @@ $("printBgCheckbox").addEventListener("change", (e) => {
 });
 
 $("resetBtn").addEventListener("click", () => {
+  state.docType = "invoice";
   $("invoiceNumberInput").value = "004";
   $("invoiceDateInput").value = defaultDate();
   $("customerNameInput").value = "";
@@ -455,22 +504,19 @@ $("resetBtn").addEventListener("click", () => {
   $("printBgCheckbox").checked = true;
   $("previewBgCheckbox").checked = true;
   $("invoice").classList.remove("no-preview-bg");
-  if (window.INVOICE_BG_BASE64) {
-    $("invoice").style.backgroundImage = `url("${window.INVOICE_BG_BASE64}")`;
-  }
+  $("invoice").style.backgroundImage = `url("${getDocBgUrl()}")`;
   document.body.classList.add("print-with-background");
   state.items = defaultItems();
   renderItemEditors();
   renderInvoice();
 });
 
-// Initialize background image from base64 if available
-if (window.INVOICE_BG_BASE64) {
-  $("invoice").style.backgroundImage = `url("${window.INVOICE_BG_BASE64}")`;
-}
+// Initialize background image
+$("invoice").style.backgroundImage = `url("${getDocBgUrl()}")`;
 document.body.classList.add("print-with-background");
 
 $("invoiceDateInput").value = defaultDate();
 bindLiveInputs();
 renderItemEditors();
 renderInvoice();
+
